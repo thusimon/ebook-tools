@@ -23,19 +23,10 @@ class MainWin:
     self.vosk_rc = VoskRecognizer(model='en')
 
   def display_transcript(self):
-    document = self.vosk_rc.document
-    if len(document) == 0:
-      return
-    elif len(document) == 1:
-      #update title
-      self.title = document[0].strip(',.\n')
-      trans = 'Title: {}\nContent:\n...'.format(self.title)
-      self.trans_texts.update(trans)
-    else:
-      self.title = document[0].strip(',.\n')
-      self.content = ''.join(document[1:])
-      trans = 'Title: {}\nContent:\n{}'.format(self.title, self.content)
-      self.trans_texts.update(trans)
+    self.title = self.vosk_rc.getTitle()
+    self.content = self.vosk_rc.getContent()
+    trans = 'Title: {}\nContent:\n{}'.format(self.title, self.content)
+    self.trans_texts.update(trans)
 
   
   def show(self):
