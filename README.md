@@ -13,5 +13,11 @@
 - Refer to the [doc](https://github.com/alphacep/vosk-api/tree/master/python)
 - Download the models from [here](https://alphacephei.com/vosk/models)
 
+## OCR
+- pip3 install Pillow
+- pip3 install pytesseract
+- install [tesseract](https://tesseract-ocr.github.io/tessdoc/)
+- pip3 install EbookLib
+
 ## UI
 - pip3 install pysimplegui

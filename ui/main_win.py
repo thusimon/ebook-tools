@@ -6,16 +6,27 @@ from recognizer.vosk_recognizer import VoskRecognizer
 
 class MainWin:
   def __init__(self) -> None:
+    menu_def = [
+      ['&Tools', ['&Talk Capture', '&Web Scraping', '&OCR', '&Epub Maker']],            
+      ['&Help', ['&About']]
+    ]
+
+    talk_capture_layout = [
+      [sg.Text('Language:'), sg.Radio('Mandarin', "LANG", default=True, key='-ZH-'), sg.Radio('English', "LANG", key='-EN-')],
+      [sg.Text('Dest Path:'), sg.InputText('D:\Home\Personal\Docs\\talkap', key='-DEST-'), sg.Button('Start', key='-START-'), sg.Button('Save', key='-SAVE-')],
+      [sg.HorizontalSeparator(color='black')],
+      [sg.Text('Ready', key='-STAT-', size=(70,1))],
+      [sg.Multiline('Title:\nContent:', size=(100,40), key='-TRANS-', autoscroll=True)]
+    ]
+
+    web_scraping_layout = [
+      [sg.Text('WebScraping:')]
+    ]
+    
     self.layout = [
-        [
-          [sg.Text('Language:'), sg.Radio('Mandarin', "LANG", default=True, key='-ZH-'), sg.Radio('English', "LANG", key='-EN-')],
-          [sg.Text('Dest Path:'), sg.InputText('D:\Home\Personal\Docs\\talkap', key='-DEST-'), sg.Button('Start', key='-START-'), sg.Button('Save', key='-SAVE-')]
-        ],
-        [sg.HorizontalSeparator(color='black')],
-        [
-          [sg.Text('Ready', key='-STAT-', size=(70,1))],
-          [sg.Multiline('Title:\nContent:', size=(100,40), key='-TRANS-', autoscroll=True)]
-        ]
+      [sg.Menu(menu_def, tearoff=False,)],
+      [sg.Column(talk_capture_layout, key='-TALK_CAPTURE_LAYOUT-', visible=True)],
+      [sg.Column(web_scraping_layout, key='-WEB_SCRAPING_LAYOUT-', visible=False)]
     ]
     self.title = 'No-title'
     self.content = ''
@@ -39,11 +50,21 @@ class MainWin:
     self.trans_texts = window['-TRANS-']
     self.start_btn = window['-START-']
     self.dest_input = window['-DEST-']
+    self.talk_cap_layout = window['-TALK_CAPTURE_LAYOUT-']
+    self.web_scrap_layout = window['-WEB_SCRAPING_LAYOUT-']
+    #self.ocr_layout = window['-OCR-LAYOUT-']
+    #self.epub_maker_layout = window['-EPUB_MAKER_LAYOUT-']
 
     while True:
       event, values = window.read(timeout=500)
-      if event == "OK" or event == sg.WIN_CLOSED:
+      if event == 'OK' or event == sg.WIN_CLOSED:
         break
+      if event == 'Talk Capture':
+        self.talk_cap_layout.update(visible=True)
+        self.web_scrap_layout.update(visible=False)
+      if event == 'Web Scraping':
+        self.talk_cap_layout.update(visible=False)
+        self.web_scrap_layout.update(visible=True)
       if event == '-START-':
         self.start = True
         self.start_btn.update(disabled=True)
