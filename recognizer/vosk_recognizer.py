@@ -5,7 +5,6 @@ import vosk
 import sys
 import json
 
-END_PAUSE = 100
 PARAGRAPH_PAUSE = 25
 PEROID_PAUSE = 10
 NOISE_PAUSE = 2
@@ -29,30 +28,25 @@ class VoskRecognizer:
 
   def count_for_pause(self):
     # if there is continous empty string for counts times, return true
-    check_count = {'end': False, 'punct': ''}
+    punct = ''
     if self.temp_segment == '':
       self.pause_count += 1
-      if self.pause_count >= END_PAUSE:
-        # should end the recognition
-        check_count = {'end': True, 'punct': ''}
-      else:
-        check_count = {'end': False, 'punct': ''}
     else:
       if self.pause_count >= PARAGRAPH_PAUSE:
         # should add '.\n' at the end
-        check_count = {'end': False, 'punct': '.\n'}
+        punct = '.\n'
       elif self.pause_count >= PEROID_PAUSE and self.pause_count < PARAGRAPH_PAUSE:
         # should add '.  ' at the end
-        check_count = {'end': False, 'punct': '.  '}
+        punct = '.  '
       elif self.pause_count >= NOISE_PAUSE and self.pause_count < PEROID_PAUSE:
         # should add ', ' at the end
-        check_count = {'end': False, 'punct': ', '}
+        punct = ', '
       else:
         # here should be noise
         pass
       # reset pause
       self.pause_count = 0
-    return check_count
+    return punct
 
   def add_punctuation(self, punctuation):
     self.temp_segment = self.temp_segment.strip(',.\n') + punctuation
@@ -84,6 +78,10 @@ class VoskRecognizer:
 
         rec = vosk.KaldiRecognizer(model, self.sample_rate)
         while True:
+          if self.idle == True:
+            print('end recording')
+            self.document.append('.\n')
+            break
           data = self.q.get()
           if rec.AcceptWaveform(data):
             recJson = json.loads(rec.Result())
@@ -100,20 +98,14 @@ class VoskRecognizer:
               partial = partial.replace(' ', '')
             self.temp_segment = partial
             #storge and trscript segment and partial segment
-            pause_check = self.count_for_pause()
-            if pause_check['end']:
-              print('Paused long enough, end recording')
-              self.document.append('.\n')
-              break
-            else:
-              # add punctionation at the end of last transcription
-              self.add_punctuation(pause_check['punct'])
-
+            puncture = self.count_for_pause()
+            self.add_punctuation(puncture)
     except KeyboardInterrupt:
       print('\nDone')
     except Exception as e:
       print(e)
 
+  def stop_recognize_loop(self):
     self.idle = True
 
   def getTitle(self):
