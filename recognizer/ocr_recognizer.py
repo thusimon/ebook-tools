@@ -14,6 +14,8 @@ class OCRRecognizer:
   def __init__(self) -> None:
     # set the tesseract_cmd as the tesseract installation path, or add the path to env
     pytesseract.pytesseract.tesseract_cmd = r'D:\Program Files\Tesseract-OCR\tesseract'
+    self.idle = True
+    self.stat = 'Ready'
 
 
   def ocr_core(self, file_path, config=r'--psm 3', lang='eng'):
@@ -37,7 +39,8 @@ class OCRRecognizer:
       file_path = join(folder_path, file)
       file_ocr = self.ocr_core(file_path, config, lang)
       ocr_result.append(file_ocr)
-      print(f'File OCR done: {file_path}')
+      self.stat = f'File OCR done: {file_path}'
+      print(self.stat)
     return ocr_result
 
   def generate_epub_dom(self, ocr_lines):
@@ -49,6 +52,8 @@ class OCRRecognizer:
     return epub_dom_out
 
   def create_epub(self, folder_path, title, author, sort_lambda=sort_by_number_name, config=r'--psm 3', lang='eng'):
+    self.idle = False
+    self.stat = f'Start generating {folder_path}/{title}_{author}.epub'
     epub_book = epub.EpubBook()
     epub_lang = EPUB_LANG[lang]
     # set metadata
@@ -83,4 +88,6 @@ class OCRRecognizer:
     epub_book.spine = spines
     # write to the file
     epub.write_epub(f'{folder_path}/{epub_identifier}.epub', epub_book, {})
-    print(f'{epub_identifier}.epub is generated')
+    self.stat = f'{folder_path}/{epub_identifier}.epub is generated'
+    print(self.stat)
+    self.idle = True
